@@ -12,11 +12,11 @@ function colorBanner() {
   const lines = banner.replace(/^\n/, "").trimEnd().split("\n")
 
   return [
-    pc.cyan(lines[0] ?? ""),
-    pc.bold(pc.cyan(lines[1] ?? "")),
-    pc.bold(pc.cyan(lines[2] ?? "")),
-    pc.bold(pc.cyan(lines[3] ?? "")),
-    pc.bold(pc.cyan(lines[4] ?? "")),
+    pc.green(lines[0] ?? ""),
+    pc.bold(pc.green(lines[1] ?? "")),
+    pc.bold(pc.green(lines[2] ?? "")),
+    pc.bold(pc.green(lines[3] ?? "")),
+    pc.bold(pc.green(lines[4] ?? "")),
   ].join("\n")
 }
 
@@ -30,15 +30,15 @@ function colorBannerLines() {
 
 function scanBannerLines(activeIndex: number) {
   return rawBannerLines()
-    .map((line, index) => (index === activeIndex ? pc.bold(pc.cyan(line)) : pc.dim(pc.cyan(line))))
+    .map((line, index) => (index === activeIndex ? pc.bold(pc.green(line)) : pc.dim(pc.green(line))))
     .join("\n")
 }
 
 export function getHeaderText() {
   return `${colorBanner()}
 
-${pc.bold(pc.cyan("Amistad"))}
-${pc.cyan("Your terminal-native job search agent.")}
+${pc.bold(pc.green("Amistad"))}
+${pc.green("Your terminal-native job search agent.")}
 `
 }
 
@@ -62,8 +62,8 @@ export async function printHeaderReveal() {
   process.stdout.write(colorBannerLines().join("\n"))
   process.stdout.write("\n")
   console.log("")
-  console.log(pc.bold(pc.cyan("Amistad")))
-  console.log(pc.cyan("Your terminal-native job search agent."))
+  console.log(pc.bold(pc.green("Amistad")))
+  console.log(pc.green("Your terminal-native job search agent."))
   console.log("")
 }
 

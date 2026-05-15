@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander"
+import { readFileSync } from "node:fs"
 import pc from "picocolors"
 import { registerConfigCommand } from "./commands/config.js"
 import { registerDoctorCommand } from "./commands/doctor.js"
@@ -11,10 +12,13 @@ import { registerProfileCommand } from "./commands/profile.js"
 import { getHeaderText, printHeaderReveal } from "./core/output/terminal.js"
 
 const program = new Command()
+const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
+  version: string
+}
 
 program
   .name("amistad")
-  .version("0.1.0")
+  .version(packageJson.version)
   .addHelpText("beforeAll", getHeaderText())
   .action(async () => {
     await printHeaderReveal()
