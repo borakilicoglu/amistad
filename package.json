@@ -17,7 +17,8 @@
     "build": "tsup src/cli.ts --format esm --clean",
     "start": "node dist/cli.js",
     "test": "vitest run",
-    "prepack": "pnpm build"
+    "prepack": "pnpm build",
+    "prepare": "husky"
   },
   "keywords": [
     "cli",
@@ -47,6 +48,7 @@
   "packageManager": "pnpm@10.13.1",
   "devDependencies": {
     "@types/node": "^25.7.0",
+    "husky": "^9.1.7",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
