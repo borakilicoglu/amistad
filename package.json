@@ -1,20 +1,48 @@
 {
   "name": "amistad",
   "version": "1.0.0",
-  "description": "",
+  "description": "Terminal-native job search agent with live LinkedIn automation and structured outputs.",
   "type": "module",
-  "main": "index.js",
+  "main": "./dist/cli.js",
   "bin": {
     "amistad": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsup src/cli.ts --format esm --clean",
-    "start": "node dist/cli.js"
+    "start": "node dist/cli.js",
+    "prepack": "pnpm build"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "cli",
+    "job-search",
+    "linkedin",
+    "playwright",
+    "mcp",
+    "automation",
+    "toon"
+  ],
+  "author": "Bora Kilicoglu",
   "license": "ISC",
+  "homepage": "https://github.com/borakilicoglu/amistad#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/borakilicoglu/amistad.git"
+  },
+  "bugs": {
+    "url": "https://github.com/borakilicoglu/amistad/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "packageManager": "pnpm@10.13.1",
   "devDependencies": {
     "@types/node": "^25.7.0",
