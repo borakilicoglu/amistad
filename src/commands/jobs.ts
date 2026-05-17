@@ -25,7 +25,7 @@ export function registerJobsCommand(program: Command) {
 
       if (!jobs) {
         console.log(pc.yellow("No saved jobs found."))
-        console.log(pc.dim("Run `amistad linkedin search --save` first."))
+        console.log(pc.dim("Run `amistad linkedin search` first."))
         process.exitCode = 1
         return
       }

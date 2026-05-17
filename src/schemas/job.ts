@@ -11,6 +11,7 @@ export const jobSchema = z.object({
   source: z.literal("linkedin"),
   posted: z.string().min(1).optional(),
   easyApply: z.boolean().optional(),
+  description: z.string().min(1).optional(),
 })
 
 export const jobsSchema = z.array(jobSchema)

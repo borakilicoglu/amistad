@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest"
-import { normalizeLinkedinJobs, readExtractedLinkedinJobs } from "../src/providers/linkedin/normalize.js"
+import {
+  normalizeLinkedinJobs,
+  readExtractedLinkedinJobs,
+  withLinkedinJobDescription,
+} from "../src/providers/linkedin/normalize.js"
 
 describe("LinkedIn normalization", () => {
   it("parses extracted cards from MCP text output", () => {
@@ -90,5 +94,29 @@ describe("LinkedIn normalization", () => {
     )
 
     expect(jobs[0]?.level).toBe("mid")
+  })
+
+  it("adds detail-page descriptions to normalized jobs", () => {
+    const [job] = normalizeLinkedinJobs(
+      [
+        {
+          id: "4",
+          title: "Software Engineer",
+          company: "Echo",
+          location: "Remote",
+          workMode: "remote",
+          posted: "",
+          easyApply: false,
+        },
+      ],
+      "mid",
+    )
+
+    expect(withLinkedinJobDescription(job!, "About the role")).toEqual(
+      expect.objectContaining({
+        id: "4",
+        description: "About the role",
+      }),
+    )
   })
 })

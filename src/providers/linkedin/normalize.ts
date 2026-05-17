@@ -43,6 +43,13 @@ export function normalizeLinkedinJobs(
   )
 }
 
+export function withLinkedinJobDescription(job: Job, description: string): Job {
+  return jobsSchema.element.parse({
+    ...job,
+    description: description || undefined,
+  })
+}
+
 function inferJobLevel(
   title: string,
   profileLevel: "all" | "junior" | "mid" | "senior",
@@ -57,4 +64,3 @@ function inferJobLevel(
 
   return profileLevel === "all" ? "mid" : profileLevel
 }
-

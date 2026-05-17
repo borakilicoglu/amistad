@@ -1,4 +1,5 @@
 import { encode } from "@toon-format/toon"
+import { cancel, isCancel, select } from "@clack/prompts"
 import type { Command } from "commander"
 import ora from "ora"
 import pc from "picocolors"
@@ -9,9 +10,14 @@ import { printHeader } from "../../core/output/terminal.js"
 import { readConfig } from "../../core/storage/config.js"
 import { jobsPath, readSearchProfile, saveJobs } from "../../core/storage/search-profile.js"
 import { searchLiveLinkedinJobs } from "../../providers/linkedin/live-search.js"
+import {
+  linkedinDatePostedLabels,
+  type LinkedinDatePostedFilter,
+} from "../../providers/linkedin/dom-scripts.js"
 
 type LinkedinSearchOptions = {
   debug?: boolean
+  datePosted?: string
   extension?: boolean
   extensionToken?: string
   format?: string
@@ -20,7 +26,6 @@ type LinkedinSearchOptions = {
   keepOpen?: boolean
   managedBrowser?: boolean
   newTab?: boolean
-  save?: boolean
 }
 
 export function registerLinkedinCommand(program: Command) {
@@ -35,10 +40,10 @@ export function registerLinkedinCommand(program: Command) {
     .option("--managed-browser", "Launch a separate Brave browser profile instead of extension mode")
     .option("--new-tab", "Open LinkedIn Jobs in a new MCP browser tab")
     .option("--format <format>", "Output format: pretty, json, or toon")
+    .option("--date-posted <filter>", "Date posted filter: past-24-hours, past-week, or past-month")
     .option("--json", "Output JSON")
-    .option("--save", "Save live LinkedIn results to .amistad/jobs.json")
     .option("--debug", "Print MCP target diagnostics")
-    .option("--no-keep-open", "Close the browser session after the search")
+    .option("--keep-open", "Keep the browser session open after the search")
     .action(async (options: LinkedinSearchOptions) => {
       const profile = readSearchProfile()
 
@@ -57,11 +62,21 @@ export function registerLinkedinCommand(program: Command) {
         return
       }
 
+      if (format === "pretty") {
+        printHeader()
+      }
+
+      const datePosted = await resolveDatePostedFilter(options)
+      if (!datePosted) {
+        process.exitCode = 1
+        return
+      }
+
       const mcp = new PlaywrightMcpClient({
         command: buildPlaywrightMcpCommand(options),
         env: buildPlaywrightMcpEnv(options),
       })
-      const spinner = format === "pretty" ? ora("Opening LinkedIn Jobs...").start() : null
+      let spinner = format === "pretty" ? ora("Preparing LinkedIn search...").start() : null
       let succeeded = false
 
       try {
@@ -70,11 +85,26 @@ export function registerLinkedinCommand(program: Command) {
           await printMcpDebug(mcp, "before")
         }
 
-        const { jobs, debug } = await searchLiveLinkedinJobs(mcp, profile, options)
+        const { jobs, debug } = await searchLiveLinkedinJobs(mcp, profile, {
+          ...options,
+          datePosted,
+          onProgress: (message) => {
+            if (spinner) {
+              spinner.succeed()
+              spinner = ora(message).start()
+            }
+          },
+        })
 
-        if (options.save) {
-          saveJobs(jobs)
+        if (spinner) {
+          spinner.succeed()
+          spinner = ora("Saving jobs...").start()
         }
+        saveJobs(jobs, {
+          profile,
+          datePosted,
+          collectedAt: new Date().toISOString(),
+        })
 
         if (options.debug) {
           await printMcpDebug(mcp, "after")
@@ -89,17 +119,15 @@ export function registerLinkedinCommand(program: Command) {
         } else if (format === "toon") {
           console.log(encode({ profile, jobs }))
         } else {
-          printHeader()
-          printJobs(jobs, `LinkedIn jobs for ${profile.role}`, "Past 24 hours")
-          if (options.save) {
-            console.log(pc.dim(`savedTo: ${jobsPath}`))
-          }
+          printJobs(jobs, `LinkedIn jobs for ${profile.role}`, linkedinDatePostedLabels[datePosted])
+          console.log(pc.dim(`savedTo: ${jobsPath}`))
         }
 
         succeeded = true
         if (options.keepOpen && format === "pretty") {
           console.log(pc.dim(`browser: ${usesExtensionMode(options) ? "extension session" : "Brave"}`))
           console.log(pc.dim("press Ctrl+C to stop the MCP session"))
+          await waitForInterrupt(mcp)
         }
       } catch (error) {
         spinner?.fail("LinkedIn search failed")
@@ -122,6 +150,76 @@ function resolveFormat(options: LinkedinSearchOptions, defaultFormat: string) {
   }
 
   return null
+}
+
+async function resolveDatePostedFilter(options: LinkedinSearchOptions): Promise<LinkedinDatePostedFilter | null> {
+  if (options.datePosted) {
+    if (isLinkedinDatePostedFilter(options.datePosted)) {
+      return options.datePosted
+    }
+
+    console.log(pc.red(`Unsupported date posted filter: ${options.datePosted}`))
+    console.log(pc.dim("Use `past-24-hours`, `past-week`, or `past-month`."))
+    return null
+  }
+
+  const selection = await select({
+    message: "Date posted",
+    options: [
+      { value: "past-24-hours", label: "Past 24 hours" },
+      { value: "past-week", label: "Past week" },
+      { value: "past-month", label: "Past month" },
+    ],
+    initialValue: "past-24-hours",
+  })
+
+  if (isCancel(selection)) {
+    cancel("LinkedIn search cancelled")
+    return null
+  }
+
+  return isLinkedinDatePostedFilter(selection) ? selection : null
+}
+
+function isLinkedinDatePostedFilter(value: string): value is LinkedinDatePostedFilter {
+  return value === "past-24-hours" || value === "past-week" || value === "past-month"
+}
+
+async function waitForInterrupt(mcp: PlaywrightMcpClient) {
+  await new Promise<void>((resolve) => {
+    const wasRaw = process.stdin.isRaw
+
+    const finish = async () => {
+      process.off("SIGINT", onSigint)
+      process.stdin.off("data", onData)
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(wasRaw ?? false)
+      }
+      process.stdin.pause()
+      console.log("")
+      console.log(pc.dim("stopping MCP session"))
+      await mcp.close()
+      resolve()
+    }
+
+    const onSigint = () => {
+      void finish()
+    }
+
+    const onData = (chunk: Buffer | string) => {
+      const text = typeof chunk === "string" ? chunk : chunk.toString("utf8")
+      if (text.includes("\u0003")) {
+        void finish()
+      }
+    }
+
+    if (process.stdin.isTTY) {
+      process.stdin.setRawMode(true)
+    }
+    process.stdin.resume()
+    process.once("SIGINT", onSigint)
+    process.stdin.on("data", onData)
+  })
 }
 
 async function printMcpDebug(mcp: PlaywrightMcpClient, label: string) {

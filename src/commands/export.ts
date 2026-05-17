@@ -18,6 +18,10 @@ function formatJobsMarkdown(jobs: Job[]) {
     lines.push(`- Level: ${job.level}`)
     lines.push(`- Source: ${job.source}`)
     lines.push(`- URL: ${job.url}`)
+    if (job.description) {
+      lines.push("")
+      lines.push(job.description)
+    }
     lines.push("")
   }
 
@@ -36,7 +40,7 @@ export function registerExportCommand(program: Command) {
 
       if (!jobs) {
         console.log(pc.yellow("No saved jobs found."))
-        console.log(pc.dim("Run `amistad linkedin search --save` first."))
+        console.log(pc.dim("Run `amistad linkedin search` first."))
         process.exitCode = 1
         return
       }

@@ -9,6 +9,7 @@ import { registerExportCommand } from "./commands/export.js"
 import { registerJobsCommand } from "./commands/jobs.js"
 import { registerLinkedinCommand } from "./commands/linkedin/search.js"
 import { registerProfileCommand } from "./commands/profile.js"
+import { registerReportCommand } from "./commands/report.js"
 import { getHeaderText, printHeaderReveal } from "./core/output/terminal.js"
 
 const program = new Command()
@@ -25,6 +26,7 @@ program
     console.log(pc.dim("Commands:"))
     console.log(pc.dim("  amistad profile"))
     console.log(pc.dim("  amistad jobs"))
+    console.log(pc.dim("  amistad report"))
     console.log(pc.dim("  amistad export"))
     console.log(pc.dim("  amistad linkedin search"))
     console.log(pc.dim("  amistad config"))
@@ -34,6 +36,7 @@ program
 
 registerProfileCommand(program)
 registerJobsCommand(program)
+registerReportCommand(program)
 registerExportCommand(program)
 registerLinkedinCommand(program)
 registerConfigCommand(program)

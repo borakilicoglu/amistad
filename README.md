@@ -71,13 +71,7 @@ Run a live LinkedIn search:
 amistad linkedin search
 ```
 
-Save the extracted jobs:
-
-```zsh
-amistad linkedin search --save
-```
-
-List saved jobs later:
+The extracted jobs are saved automatically. List saved jobs later:
 
 ```zsh
 amistad jobs
@@ -89,6 +83,7 @@ amistad jobs
 amistad profile
 amistad profile show
 amistad jobs
+amistad report
 amistad export
 amistad linkedin search
 amistad config
@@ -101,8 +96,6 @@ amistad doctor
 amistad linkedin search
 amistad linkedin search --json
 amistad linkedin search --format toon
-amistad linkedin search --save
-amistad linkedin search --json --save
 ```
 
 Useful options:
@@ -112,7 +105,7 @@ Useful options:
 --managed-browser          Launch a separate Brave profile instead of extension mode
 --new-tab                  Open LinkedIn Jobs in a new MCP browser tab
 --debug                    Print MCP diagnostics
---no-keep-open             Close the browser session after the search
+--keep-open                Keep the browser session open after the search
 ```
 
 ### Output Formats
@@ -122,6 +115,7 @@ Human-readable:
 ```zsh
 amistad linkedin search
 amistad jobs
+amistad report
 ```
 
 JSON:
@@ -136,6 +130,14 @@ TOON:
 ```zsh
 amistad linkedin search --format toon
 amistad jobs --format toon
+```
+
+Reports:
+
+```zsh
+amistad report
+amistad report --format markdown --output .amistad/report.md
+amistad report --format json
 ```
 
 ## Local State

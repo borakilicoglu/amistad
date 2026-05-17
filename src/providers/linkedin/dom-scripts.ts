@@ -101,7 +101,17 @@ export function buildFillLinkedinSearchInputScript(role: string) {
   }`
 }
 
-export function buildApplyPast24HoursFilterScript() {
+export type LinkedinDatePostedFilter = "past-24-hours" | "past-week" | "past-month"
+
+export const linkedinDatePostedLabels: Record<LinkedinDatePostedFilter, string> = {
+  "past-24-hours": "Past 24 hours",
+  "past-week": "Past week",
+  "past-month": "Past month",
+}
+
+export function buildApplyDatePostedFilterScript(filter: LinkedinDatePostedFilter) {
+  const filterLabel = linkedinDatePostedLabels[filter]
+
   return `async () => {
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const waitFor = async (find, label) => {
@@ -121,11 +131,11 @@ export function buildApplyPast24HoursFilterScript() {
     );
     datePostedControl.click();
 
-    const past24HoursOption = await waitFor(
-      () => document.querySelector('[role="radio"][aria-label="Past 24 hours"]'),
-      "Past 24 hours option",
+    const selectedOption = await waitFor(
+      () => document.querySelector('[role="radio"][aria-label="${filterLabel}"]'),
+      "${filterLabel} option",
     );
-    past24HoursOption.click();
+    selectedOption.click();
 
     const showResultsLink = await waitFor(
       () => Array.from(document.querySelectorAll("a")).find((element) =>
@@ -138,7 +148,9 @@ export function buildApplyPast24HoursFilterScript() {
     return {
       applied: true,
       datePostedExpanded: datePostedControl.getAttribute("aria-expanded"),
-      past24HoursChecked: past24HoursOption.getAttribute("aria-checked"),
+      selectedFilter: "${filter}",
+      selectedFilterLabel: "${filterLabel}",
+      selectedFilterChecked: selectedOption.getAttribute("aria-checked"),
       showResultsHref: showResultsLink.getAttribute("href"),
       url: location.href,
     };
@@ -149,13 +161,6 @@ export function buildExtractJobCardsScript() {
   return `async () => {
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const cardSelector = '[role="button"][componentkey^="job-card-component-ref-"]';
-
-    let cards = [];
-    for (let attempt = 0; attempt < 30; attempt += 1) {
-      cards = Array.from(document.querySelectorAll(cardSelector));
-      if (cards.length > 0) break;
-      await wait(500);
-    }
 
     const clean = (value) => value?.replace(/\\s+/g, " ").trim() ?? "";
     const collapseRepeatedText = (value) => {
@@ -170,7 +175,8 @@ export function buildExtractJobCardsScript() {
     const getJobId = (card) =>
       card.getAttribute("componentkey")?.replace("job-card-component-ref-", "") ?? "";
 
-    const jobs = cards.map((card) => {
+    const readCurrentPageJobs = () =>
+      Array.from(document.querySelectorAll(cardSelector)).map((card) => {
       const dismissButton = card.querySelector('button[aria-label^="Dismiss "]');
       const dismissLabel = dismissButton?.getAttribute("aria-label") ?? "";
       const title = dismissLabel.replace(/^Dismiss\\s+/, "").replace(/\\s+job$/, "");
@@ -210,7 +216,94 @@ export function buildExtractJobCardsScript() {
       };
     });
 
-    return { count: jobs.length, jobs, url: location.href };
+    const waitForCards = async () => {
+      for (let attempt = 0; attempt < 30; attempt += 1) {
+        const jobs = readCurrentPageJobs();
+        if (jobs.length > 0) return jobs;
+        await wait(500);
+      }
+      return [];
+    };
+
+    const getCurrentPage = () =>
+      document.querySelector('[data-testid="pagination-controls-list"] [aria-current="true"]')
+        ?.getAttribute("aria-label") ?? "";
+
+    const getNextButton = () =>
+      document.querySelector('[data-testid="pagination-controls-next-button-visible"]');
+
+    const isDisabled = (element) =>
+      !element ||
+      element.hasAttribute("disabled") ||
+      element.getAttribute("aria-disabled") === "true";
+
+    const allJobs = [];
+    const seenJobIds = new Set();
+    const visitedPages = [];
+    let jobs = await waitForCards();
+
+    for (let pageIndex = 0; pageIndex < 50 && jobs.length > 0; pageIndex += 1) {
+      const currentPage = getCurrentPage();
+      if (currentPage && visitedPages.includes(currentPage)) break;
+      if (currentPage) visitedPages.push(currentPage);
+
+      for (const job of jobs) {
+        if (!job.id || seenJobIds.has(job.id)) continue;
+        seenJobIds.add(job.id);
+        allJobs.push(job);
+      }
+
+      const nextButton = getNextButton();
+      if (isDisabled(nextButton)) break;
+
+      const previousIds = jobs.map((job) => job.id).join(",");
+      nextButton.click();
+
+      for (let attempt = 0; attempt < 30; attempt += 1) {
+        await wait(500);
+        jobs = readCurrentPageJobs();
+        const nextIds = jobs.map((job) => job.id).join(",");
+        if (jobs.length > 0 && nextIds !== previousIds) break;
+      }
+
+      if (jobs.map((job) => job.id).join(",") === previousIds) break;
+    }
+
+    return {
+      count: allJobs.length,
+      jobs: allJobs,
+      pageCount: visitedPages.length || (allJobs.length > 0 ? 1 : 0),
+      pages: visitedPages,
+      url: location.href,
+    };
   }`
 }
 
+export function buildExtractJobDescriptionScript() {
+  return `async () => {
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const clean = (value) => value?.replace(/\\s+/g, " ").trim() ?? "";
+
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      const heading = Array.from(document.querySelectorAll("h2")).find(
+        (element) => clean(element.textContent) === "About the job",
+      );
+      const container = heading?.parentElement?.parentElement;
+      const description = container?.querySelector('[data-testid="expandable-text-box"]');
+
+      if (description) {
+        return {
+          description: clean(description.textContent),
+          url: location.href,
+        };
+      }
+
+      await wait(500);
+    }
+
+    return {
+      description: "",
+      url: location.href,
+    };
+  }`
+}

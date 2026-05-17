@@ -4,6 +4,7 @@ import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import {
   readJobs,
+  readJobResults,
   readSearchProfile,
   saveJobs,
   saveSearchProfile,
@@ -52,9 +53,21 @@ describe("search profile storage", () => {
     ]
 
     saveSearchProfile(profile)
-    saveJobs(jobs)
+    saveJobs(jobs, {
+      profile,
+      datePosted: "past-week",
+      collectedAt: "2026-05-17T10:00:00.000Z",
+    })
 
     expect(readSearchProfile()).toEqual(profile)
     expect(readJobs()).toEqual(jobs)
+    expect(readJobResults()).toEqual({
+      metadata: {
+        profile,
+        datePosted: "past-week",
+        collectedAt: "2026-05-17T10:00:00.000Z",
+      },
+      jobs,
+    })
   })
 })
