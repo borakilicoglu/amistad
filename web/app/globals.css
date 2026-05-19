@@ -1,12 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-page: #f8f9fa;
-  --color-panel: #ffffff;
+  --color-page: #ffffff;
+  --color-panel: #f8fafd;
+  --color-search: #f4f6fc;
   --color-rail: #1e1f20;
   --color-rail-ink: #e8eaed;
   --color-rail-muted: #bdc1c6;
   --color-rail-hover: #303134;
+  --color-rail-border: #c4c6c4;
   --color-rail-active: #004a76;
   --color-rail-active-ink: #7fcfff;
   --color-line: #dadce0;
@@ -16,7 +18,9 @@
   --color-accent-soft: #e8f0fe;
   --color-tag: #f1f3f4;
   --color-body-copy: #3c4043;
-  --color-detail-panel: #1b1b1b;
+  --color-detail-panel: #f8fafd;
+  --color-job-hover: #ededed;
+  --color-sort-value: #454746;
 }
 
 @layer base {
@@ -42,10 +46,12 @@
   html[data-theme="dark"] {
     --color-page: #131314;
     --color-panel: #292a2d;
+    --color-search: #222327;
     --color-rail: #1e1f20;
     --color-rail-ink: #e8eaed;
     --color-rail-muted: #bdc1c6;
     --color-rail-hover: #303134;
+    --color-rail-border: #303134;
     --color-rail-active: #004a76;
     --color-rail-active-ink: #7fcfff;
     --color-line: #3c4043;
@@ -56,6 +62,8 @@
     --color-tag: #303134;
     --color-body-copy: #e8eaed;
     --color-detail-panel: #1b1b1b;
+    --color-job-hover: #1b1b1b;
+    --color-sort-value: #e8eaed;
     color-scheme: dark;
   }
 

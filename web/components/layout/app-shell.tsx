@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import {
   ArrowCounterClockwiseIcon,
   BriefcaseIcon,
+  CaretDownIcon,
   MagnifyingGlassIcon,
   MoonIcon,
+  PaletteIcon,
   ReadCvLogoIcon,
   SlidersHorizontalIcon,
   SunIcon,
+  UserIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import Link from "next/link";
@@ -37,7 +40,7 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-page">
-      <aside className="fixed inset-y-0 left-0 z-40 flex w-24 flex-col items-center justify-between bg-rail px-3 py-5 max-lg:static max-lg:w-auto max-lg:flex-row">
+      <aside className="fixed inset-y-0 left-0 z-40 flex w-24 flex-col items-center justify-between bg-rail px-3 py-7 max-lg:static max-lg:w-auto max-lg:flex-row">
         <div className="grid gap-5 max-lg:flex max-lg:items-center">
           <nav className="grid gap-4 max-lg:flex">
             <RailItem
@@ -52,6 +55,12 @@ export function AppShell({
               icon={<ReadCvLogoIcon size={24} weight="duotone" />}
               label="Reports"
             />
+            <RailItem
+              active={pathname === "/design-guide"}
+              href="/design-guide"
+              icon={<PaletteIcon size={24} weight="duotone" />}
+              label="Guide"
+            />
           </nav>
         </div>
 
@@ -65,7 +74,7 @@ export function AppShell({
           filtersOpen && filterDrawer ? "pl-104" : "pl-24"
         } max-lg:pl-0`}
       >
-        <header className="sticky top-0 z-10 grid gap-5 bg-page px-16 py-5 max-md:px-8">
+        <header className="sticky top-0 z-10 grid h-38 content-center gap-5 bg-page px-16 max-md:px-8">
           <div className="flex items-center gap-5 max-lg:flex-col max-lg:items-stretch">
             <div className="flex h-12 items-center gap-4">
               <h1 className="m-0 text-3xl font-semibold leading-none">
@@ -73,23 +82,31 @@ export function AppShell({
               </h1>
             </div>
 
-            <div className="flex min-w-115 flex-1 items-stretch overflow-hidden rounded-full bg-rail max-lg:min-w-0">
+            <div className="flex h-14 min-w-115 flex-1 items-stretch overflow-hidden rounded-full bg-search max-lg:min-w-0">
               <div className="flex min-w-0 flex-1 items-center gap-3 px-5 py-2 text-rail-muted">
                 <MagnifyingGlassIcon size={20} />
                 <input
-                  className="min-w-0 flex-1 bg-transparent text-sm text-rail-ink outline-none placeholder:text-rail-muted"
+                  className="min-w-0 flex-1 bg-transparent text-rail-ink outline-none placeholder:text-rail-muted"
                   onChange={(event) => onSearchChange?.(event.target.value)}
                   placeholder="Search jobs"
                   type="search"
                   value={searchValue}
                 />
               </div>
-              <div className="border-l border-rail-hover px-5 py-2">
-                <span className="block text-xs text-rail-muted">Sort by</span>
-                <span className="text-sm font-semibold text-rail-ink">
-                  Recent
+              <div className="flex items-center gap-8 border-l border-rail-border px-8 py-2">
+                <div className="flex flex-col justify-center">
+                  <span className="block text-xs text-rail-muted">Sort by</span>
+                  <span className="text-sm font-medium text-sort-value">
+                    Recent
+                  </span>
+                </div>
+                <span className="grid place-items-center text-sort-value">
+                  <CaretDownIcon size={14} weight="fill" />
                 </span>
               </div>
+            </div>
+            <div className="grid place-items-center p-2 cursor-pointer text-rail-muted hover:text-rail-ink hover:bg-[#212122] rounded-full transition-colors">
+              <UserIcon size={24} weight="fill" />
             </div>
           </div>
 
@@ -228,5 +245,11 @@ function ThemeToggle() {
 function formatContext(data: DashboardData) {
   if (!data.metadata) return "Search context unavailable";
   const { profile, datePosted } = data.metadata;
-  return `${profile.role} | ${profile.location} | ${datePosted.replaceAll("-", " ")}`;
+  return `${profile.role} | ${profile.location} | ${formatDatePosted(datePosted)}`;
+}
+
+function formatDatePosted(datePosted: DashboardData["metadata"]["datePosted"]) {
+  if (datePosted === "past-24-hours") return "Past 24 hours";
+  if (datePosted === "past-week") return "Past week";
+  return "Past month";
 }

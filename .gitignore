@@ -3,3 +3,9 @@ dist/
 node_modules/
 .amistad/
 .playwright-mcp/
+.next/
+web/.next/
+*.tsbuildinfo
+web/tsconfig.tsbuildinfo
+out/
+web/out/
