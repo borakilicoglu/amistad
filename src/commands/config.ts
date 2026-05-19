@@ -43,7 +43,7 @@ export function registerConfigCommand(program: Command) {
       }
 
       printHeader()
-      console.log(pc.bold(pc.cyan("Amistad config")))
+      console.log(pc.bold(pc.green("Amistad config")))
       console.log("")
       console.log(`${pc.dim("format:")} ${currentConfig.defaultFormat}`)
       console.log(`${pc.dim("location:")} ${currentConfig.defaultLocation}`)

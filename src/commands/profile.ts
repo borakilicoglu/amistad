@@ -28,7 +28,7 @@ export function registerProfileCommand(program: Command) {
       const config = readConfig()
 
       printHeader()
-      intro(pc.cyan("Amistad job profile"))
+      intro(pc.green("Amistad job profile"))
 
       const role = await text({
         message: "What role are you looking for?",

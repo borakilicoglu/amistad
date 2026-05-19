@@ -3,7 +3,7 @@ import type { Job } from "../../schemas/job.js"
 
 export function printJobs(jobs: Job[], title: string, subtitle?: string) {
   console.log("")
-  console.log(pc.bold(pc.cyan(title)))
+  console.log(pc.bold(pc.green(title)))
   if (subtitle) {
     console.log(pc.dim(subtitle))
   }

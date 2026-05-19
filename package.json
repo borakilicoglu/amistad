@@ -14,7 +14,9 @@
   ],
   "scripts": {
     "dev": "tsx src/cli.ts",
+    "dev:web": "pnpm --dir web dev",
     "build": "tsup src/cli.ts --format esm --clean",
+    "build:web": "pnpm --dir web build",
     "start": "node dist/cli.js",
     "test": "vitest run",
     "prepack": "pnpm build",

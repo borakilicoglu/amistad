@@ -2,8 +2,8 @@ import { homedir } from "node:os"
 import { getProjectEnv } from "../config/env.js"
 import { amistadDirectory } from "../storage/search-profile.js"
 
-const braveExecutablePath = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
-const braveUserDataDir = `${homedir()}/Library/Application Support/BraveSoftware/Brave-Browser`
+export const defaultBraveExecutablePath = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+export const defaultBraveUserDataDir = `${homedir()}/Library/Application Support/BraveSoftware/Brave-Browser`
 
 export type BrowserLaunchOptions = {
   extensionToken?: string
@@ -31,14 +31,14 @@ export function buildPlaywrightMcpCommand(options: BrowserLaunchOptions) {
   }
 
   const parts = ["./node_modules/.bin/playwright-mcp"]
-  const executablePath = getProjectEnv("PLAYWRIGHT_MCP_EXECUTABLE_PATH") ?? braveExecutablePath
+  const executablePath = getProjectEnv("PLAYWRIGHT_MCP_EXECUTABLE_PATH") ?? defaultBraveExecutablePath
 
   if (usesExtensionMode(options)) {
     parts.push("--extension")
     parts.push("--executable-path", quoteCommandArg(executablePath))
     parts.push(
       "--user-data-dir",
-      quoteCommandArg(getProjectEnv("PLAYWRIGHT_MCP_USER_DATA_DIR") ?? braveUserDataDir),
+      quoteCommandArg(getProjectEnv("PLAYWRIGHT_MCP_USER_DATA_DIR") ?? defaultBraveUserDataDir),
     )
   } else {
     parts.push("--executable-path", quoteCommandArg(executablePath))

@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme {
+  --color-page: #f8f9fa;
+  --color-panel: #ffffff;
+  --color-rail: #1e1f20;
+  --color-rail-ink: #e8eaed;
+  --color-rail-muted: #bdc1c6;
+  --color-rail-hover: #303134;
+  --color-rail-active: #004a76;
+  --color-rail-active-ink: #7fcfff;
+  --color-line: #dadce0;
+  --color-ink: #202124;
+  --color-muted: #5f6368;
+  --color-accent: #1a73e8;
+  --color-accent-soft: #e8f0fe;
+  --color-tag: #f1f3f4;
+  --color-body-copy: #3c4043;
+  --color-detail-panel: #1b1b1b;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-page);
+    color: var(--color-ink);
+    letter-spacing: 0;
+    font-family:
+      "Google Sans Flex Variable", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+  }
+
+  html[data-theme="dark"] {
+    --color-page: #131314;
+    --color-panel: #292a2d;
+    --color-rail: #1e1f20;
+    --color-rail-ink: #e8eaed;
+    --color-rail-muted: #bdc1c6;
+    --color-rail-hover: #303134;
+    --color-rail-active: #004a76;
+    --color-rail-active-ink: #7fcfff;
+    --color-line: #3c4043;
+    --color-ink: #e8eaed;
+    --color-muted: #bdc1c6;
+    --color-accent: #8ab4f8;
+    --color-accent-soft: #1f3b63;
+    --color-tag: #303134;
+    --color-body-copy: #e8eaed;
+    --color-detail-panel: #1b1b1b;
+    color-scheme: dark;
+  }
+
+  html[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  .job-item {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .job-item:first-child,
+  .job-item:hover,
+  .job-item:hover + .job-item,
+  .job-item-active,
+  .job-item-active + .job-item {
+    border-top-color: transparent;
+  }
+}
