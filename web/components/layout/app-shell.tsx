@@ -16,7 +16,7 @@ import {
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { DashboardData } from "../../lib/data";
+import type { DashboardData, SearchMetadata } from "../../lib/data";
 
 export function AppShell({
   data,
@@ -106,7 +106,7 @@ export function AppShell({
               </div>
             </div>
             <div className="grid place-items-center p-2 cursor-pointer text-rail-muted hover:text-rail-ink hover:bg-[#212122] rounded-full transition-colors">
-              <UserIcon size={24} weight="fill" />
+              <UserIcon size={24} weight="duotone" />
             </div>
           </div>
 
@@ -248,8 +248,8 @@ function formatContext(data: DashboardData) {
   return `${profile.role} | ${profile.location} | ${formatDatePosted(datePosted)}`;
 }
 
-function formatDatePosted(datePosted: DashboardData["metadata"]["datePosted"]) {
+function formatDatePosted(datePosted: SearchMetadata["datePosted"]) {
   if (datePosted === "past-24-hours") return "Past 24 hours";
-  if (datePosted === "past-week") return "Past week";
-  return "Past month";
+  if (datePosted === "past-week") return "Past Week";
+  return "Past Month";
 }

@@ -23,6 +23,7 @@ export function JobRow({
         <strong className="font-semibold text-ink">{job.company}</strong>
         <span>{job.workMode}</span>
         <span>{job.level}</span>
+        {job.posted ? <span>{job.posted}</span> : null}
       </span>
       <span className="text-2xl font-semibold leading-tight">{job.title}</span>
     </button>
